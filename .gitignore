@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+*.ipynb_checkpoints/
+dataset_with_embeddings
+freelancer_job_postings.csv
+initial_eda.ipynb
+neural_network_training.ipynb
