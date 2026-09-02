@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import numpy as np
 import joblib
 import tensorflow as tf
-from sentence_transformers import SentenceTransformer
+
 from pathlib import Path
 from fastapi.responses import FileResponse
 app = FastAPI(
@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent
 fixed_model   = tf.keras.models.load_model(BASE_DIR / 'fixed_price_model.keras')
 hourly_model  = tf.keras.models.load_model(BASE_DIR / 'hourly_rate_model.keras')
 country_enc   = joblib.load(BASE_DIR / 'country_encoder.joblib')
-embed_model   = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+
 
 
 class JobInput(BaseModel):
@@ -39,7 +39,9 @@ async def serve_html():
 def predict(job: JobInput):
     if job.rate_type not in ("fixed", "hourly"):
         raise HTTPException(status_code=400, detail="rate_type must be 'fixed' or 'hourly'")
+    from sentence_transformers import SentenceTransformer
 
+    embed_model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
     # Combine text exactly as done during training
     text = f"{job.job_title} | {job.job_description} | {job.tags}"
 
