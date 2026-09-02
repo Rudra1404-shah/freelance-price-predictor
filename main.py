@@ -1,4 +1,5 @@
 import os
+
 os.environ['USE_TF'] = '0'  # force sentence-transformers to use PyTorch, not TensorFlow
 
 from fastapi import FastAPI, HTTPException
@@ -8,7 +9,7 @@ import joblib
 import tensorflow as tf
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
-
+from fastapi.responses import FileResponse
 app = FastAPI(
     title="Freelance Price Predictor",
     description="Predicts avg price for freelance jobs using neural networks + text embeddings"
@@ -30,11 +31,9 @@ class JobInput(BaseModel):
     client_country: str
     rate_type: str  # 'fixed' or 'hourly'
 
-
 @app.get("/")
-def root():
-    return {"message": "Freelance Price Predictor API is running"}
-
+async def serve_html():
+    return FileResponse("index.html", media_type="text/html")
 
 @app.post("/predict")
 def predict(job: JobInput):
