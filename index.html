@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            margin-top: 35px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-label {
+            color: #718096;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .result-price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 13px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .detail-label {
+            color: #718096;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .error-message {
+            padding: 15px;
+            background: #fed7d7;
+            color: #c53030;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .api-status {
+            font-size: 12px;
+            color: #a0aec0;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f56565;
+            margin-right: 6px;
+        }
+
+        .status-indicator.online {
+            background: #48bb78;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+
+            .result-price {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Freelance Price Predictor</h1>
+            <p class="subtitle">AI-powered salary estimation using neural networks & text embeddings</p>
+        </header>
+
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="jobTitle">Job Title *</label>
+                <input type="text" id="jobTitle" placeholder="e.g., Python Web Developer, Mobile App Designer" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jobDescription">Job Description *</label>
+                <textarea id="jobDescription" placeholder="Describe the job requirements and scope..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Tags (comma-separated) *</label>
+                <input type="text" id="tags" placeholder="e.g., python, django, react, database, api" required>
+            </div>
+
+            <div class="form-group">
+                <label for="clientCountry">Client Country *</label>
+                <select id="clientCountry" required>
+                    <option value="">Loading countries...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Rate Type *</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="rateFixed" name="rateType" value="fixed" checked>
+                        <label for="rateFixed">Fixed Price</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="rateHourly" name="rateType" value="hourly">
+                        <label for="rateHourly">Hourly Rate</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Predict Price</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing job details...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-label">Predicted Average Price</div>
+            <div class="result-price" id="predictedPrice">$0.00</div>
+            <div class="result-details">
+                <div class="detail-item">
+                    <div class="detail-label">Rate Type</div>
+                    <div class="detail-value" id="rateTypeDisplay">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Client Country</div>
+                    <div class="detail-value" id="countryDisplay">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-status">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Checking API...</span>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+
+        // Load countries on page load
+        document.addEventListener('DOMContentLoaded', loadCountries);
+
+        // Check API status
+        checkApiStatus();
+        setInterval(checkApiStatus, 5000); // Check every 5 seconds
+
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_URL}/`);
+                if (response.ok) {
+                    document.getElementById('statusIndicator').classList.add('online');
+                    document.getElementById('statusText').textContent = 'API Status: Online';
+                }
+            } catch (error) {
+                document.getElementById('statusIndicator').classList.remove('online');
+                document.getElementById('statusText').textContent = 'API Status: Offline';
+            }
+        }
+
+        async function loadCountries() {
+            try {
+                const response = await fetch(`${API_URL}/countries`);
+                const data = await response.json();
+                const countrySelect = document.getElementById('clientCountry');
+                
+                countrySelect.innerHTML = '<option value="">Select a country...</option>';
+                
+                data.countries.sort().forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country;
+                    option.textContent = country;
+                    countrySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading countries:', error);
+                document.getElementById('clientCountry').innerHTML = 
+                    '<option value="">Failed to load countries</option>';
+            }
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const jobTitle = document.getElementById('jobTitle').value;
+            const jobDescription = document.getElementById('jobDescription').value;
+            const tags = document.getElementById('tags').value;
+            const clientCountry = document.getElementById('clientCountry').value;
+            const rateType = document.querySelector('input[name="rateType"]:checked').value;
+
+            // Validate
+            if (!clientCountry) {
+                showError('Please select a country');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultBox').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
+
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_title: jobTitle,
+                        job_description: jobDescription,
+                        tags: tags,
+                        client_country: clientCountry,
+                        rate_type: rateType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Prediction failed');
+                }
+
+                // Display result
+                const priceSymbol = rateType === 'hourly' ? '$' : '$';
+                const priceUnit = rateType === 'hourly' ? '/hour' : '';
+                
+                document.getElementById('predictedPrice').textContent = 
+                    `${priceSymbol}${data.predicted_avg_price_usd}${priceUnit}`;
+                document.getElementById('rateTypeDisplay').textContent = 
+                    rateType === 'fixed' ? 'Fixed Price' : 'Hourly Rate';
+                document.getElementById('countryDisplay').textContent = data.client_country;
+
+                document.getElementById('resultBox').classList.add('show');
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
