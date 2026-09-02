@@ -8,9 +8,6 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download embedding model into image
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-mpnet-base-v2')"
-
 # Copy model files
 COPY fixed_price_model.keras .
 COPY hourly_rate_model.keras .
