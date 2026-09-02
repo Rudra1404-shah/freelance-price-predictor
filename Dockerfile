@@ -1,8 +1,8 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy requirements
+# Copy requirements first (for caching)
 COPY requirements.txt .
 
 # Install dependencies
@@ -16,8 +16,7 @@ COPY fixed_price_model.keras .
 COPY hourly_rate_model.keras .
 COPY country_encoder.joblib .
 
-# Copy app files
-COPY app/ app/
+# Copy main app files
 COPY main.py .
 COPY index.html .
 
